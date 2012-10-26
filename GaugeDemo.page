@@ -1,0 +1,12 @@
+<apex:page standardController="Account" extensions="GaugeChartController">
+    <script>
+            myChart.on('beforeconfig', function(config) {
+            config.axes[0].margin=-10; 
+        });
+    </script>
+    
+    <apex:chart name="myChart" height="300" width="450" animate="true" data="{!data}">
+        <apex:axis type="Gauge" position="gauge" title="Closed Won Opportunities"  minimum="0" maximum="30000" steps="10"/>
+        <apex:gaugeSeries dataField="size" donut="50" colorSet="#78c953,#ddd"/>
+    </apex:chart>
+</apex:page>
