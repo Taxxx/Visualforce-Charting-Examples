@@ -1,0 +1,44 @@
+<apex:page standardController="Campaign" extensions="ScatterChartController">
+	<script src="{!$Resource.jquery180}"/>  
+    <script>	
+        function getRemoteData(callback) {
+           ScatterChartController.getRemoteScatterData(function(result, event) {
+           		var sourceType = $('[id*="leadSource"]').val();
+           		var newResultList = new Array();
+           		var index = 0;
+
+               if(event.status && result && result.constructor === Array) {
+               	for(i = 0; i < result.length; i++){
+               		if(result[i].type == sourceType ){
+	               		newResultList[index] = result[i];
+	           			index++;
+	           		} else if (sourceType == 'All') {
+           				newResultList[index] = result[i];
+           				index++;
+           			}
+           		}
+                callback(newResultList); 
+              }
+           });
+        }
+    </script>
+    
+    <apex:form >
+    	<apex:actionFunction action="{!getNoOp}" name="getMyRemoteData" rerender="mychartpanel" />
+	    <apex:selectList id="leadSource" onchange="getMyRemoteData();" value="{!source}" multiselect="false" size="1"  >
+	    	<apex:selectOptions value="{!sources}" />
+	    </apex:selectList>
+
+		<apex:outputPanel id="mychartpanel">
+		    <apex:chart height="530" width="700" animate="true" id="myChart" data="getRemoteData"> 
+		        <apex:scatterSeries xField="expected" yField="amount" markerType="circle" markerSize="3" markerFill="#551A8B" />
+		        <apex:axis type="Numeric" position="bottom" fields="expected"  title="Expected Revenue" grid="true" maximum="50000" minimum="0">
+		            <apex:chartLabel />
+		        </apex:axis>
+		        <apex:axis type="Numeric" position="left" fields="amount"  title="Actual Amount" grid="true" maximum="50000" minimum="0">
+		            <apex:chartLabel />
+		        </apex:axis>
+			</apex:chart>
+		</apex:outputPanel>
+	</apex:form>
+</apex:page>
