@@ -2,26 +2,25 @@ public class GaugeChartController {
     public String acctId {get;set;}
     
     public GaugeChartController(ApexPages.StandardController controller){
-        acctId = controller.getRecord().Id; //'001x00000035Sm4' ;
+        acctId = controller.getRecord().Id; //'001x00000035SxX' ;
     }
     
     public List<gaugeData> getData() {
-        Decimal TotalAmount = 0.00;
-        Integer TotalOpptys = 0;
-        List<Opportunity> ClosedWonOpptys = [select Amount, CloseDate 
-                                                from Opportunity 
-                                                where AccountId =: acctId 
-                                                and StageName = 'Closed Won'];
-        for(Opportunity opp : ClosedWonOpptys){
-            if(opp.CloseDate.month() == date.Today().month()){
-                TotalAmount += opp.Amount;
-                TotalOpptys++;
-            }
-        }
-        List<gaugeData> data = new List<gaugeData>();
-        data.add(new gaugeData(TotalOpptys + ' Opptys', Integer.valueOf(TotalAmount)));
-        return data;
-    }
+    	  Integer TotalOpptys = 0;
+    	  Integer TotalAmount = 0;
+          Integer thisMonth = date.Today().month();
+
+          AggregateResult ClosedWonOpptys = [select SUM(Amount) totalRevenue, CALENDAR_MONTH(CloseDate) theMonth, COUNT(Name) numOpps
+                                   from Opportunity
+                                  where AccountId =: acctId
+                                   and StageName = 'Closed Won' 
+                                   and CALENDAR_MONTH(CloseDate) =: thisMonth 
+                                   GROUP BY CALENDAR_MONTH(CloseDate) LIMIT 1];
+          
+          List<gaugeData> data = new List<gaugeData>();
+          data.add(new gaugeData(Integer.valueOf(ClosedWonOpptys.get('numOpps')) + ' Opptys', Integer.valueOf(ClosedWonOpptys.get('totalRevenue'))));
+          return data;
+     }
 
     public class gaugeData {
         public String name { get; set; }
